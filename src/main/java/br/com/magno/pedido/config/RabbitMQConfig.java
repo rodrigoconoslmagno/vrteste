@@ -54,7 +54,7 @@ public class RabbitMQConfig {
         connectionFactory.setPassword(passWord);
         connectionFactory.setVirtualHost(userName); 
         connectionFactory.setPort(port);
-        
+
         return connectionFactory;
     }
 	
