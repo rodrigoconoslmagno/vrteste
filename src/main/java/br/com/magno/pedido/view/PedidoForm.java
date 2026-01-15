@@ -4,13 +4,11 @@ import br.com.magno.pedido.entidade.Pedido;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.databind.SerializationFeature;
 import com.fasterxml.jackson.datatype.jsr310.JavaTimeModule;
-
 import javax.swing.*;
 import javax.swing.text.AbstractDocument;
 import javax.swing.text.AttributeSet;
 import javax.swing.text.BadLocationException;
 import javax.swing.text.DocumentFilter;
-
 import java.awt.*;
 import java.net.URI;
 import java.net.http.HttpClient;
@@ -60,7 +58,7 @@ public class PedidoForm extends JFrame {
         ((AbstractDocument) txtQuantidade.getDocument()).setDocumentFilter(new DocumentFilter() {
             @Override
             public void insertString(FilterBypass fb, int offset, String string, AttributeSet attr) throws BadLocationException {
-                if (string.matches("\\d+")) { // \d+ significa apenas dígitos
+                if (string.matches("\\d+")) { 
                     super.insertString(fb, offset, string, attr);
                 }
             }
@@ -189,25 +187,21 @@ public class PedidoForm extends JFrame {
     }    
     
     private void iniciarPollingStatus(UUID id) {
-        // Criamos um Worker para gerenciar o loop de consulta em background
         SwingWorker<Void, String> worker = new SwingWorker<>() {
             @Override
             protected Void doInBackground() throws Exception {
                 String status = "";
-                // Loop de polling até chegar em um estado final
                 while (!status.equals("SUCESSO") && !status.equals("FALHA")) {
-                    Thread.sleep(2000); // Aguarda 2 segundos entre consultas
+                    Thread.sleep(2_000);
                     
                     HttpRequest request = HttpRequest.newBuilder()
                             .uri(URI.create("http://localhost:8080/api/pedidos/status/" + id))
                             .GET()
                             .build();
 
-                    // Chamada síncrona dentro do background thread
                     HttpResponse<String> response = httpClient.send(request, HttpResponse.BodyHandlers.ofString());
                     status = response.body();
                     
-                    // Envia o status para o método process() que roda na UI Thread
                     publish(status); 
                 }
                 return null;
@@ -215,24 +209,22 @@ public class PedidoForm extends JFrame {
 
             @Override
             protected void process(java.util.List<String> chunks) {
-                // Pega o último status recebido e atualiza a Label com segurança
                 String ultimoStatus = chunks.get(chunks.size() - 1);
                 lblStatus.setText("Status: " + ultimoStatus);
             }
 
             @Override
             protected void done() {
-                // Executado quando o loop do doInBackground termina
                 btnEnviar.setEnabled(true);
                 try {
-                    get(); // Verifica se houve exceções durante a execução
+                    get();
                 } catch (Exception e) {
                     lblStatus.setText("Erro ao consultar status.");
                 }
             }
         };
 
-        worker.execute(); // Inicia a execução do Worker
+        worker.execute();
     }
     
     public static void main(String[] args) {
